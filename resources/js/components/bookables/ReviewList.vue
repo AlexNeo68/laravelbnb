@@ -7,7 +7,7 @@
                 <div class="row">
                     <div class="col-md-6">Alexander Neudahin</div>
                     <div class="col-md-6 d-flex justify-content-end">
-                        <rating-stars :rating="review.rating" class="fa-lg"></rating-stars>
+                        <rating-stars :value="review.rating" class="fa-lg"></rating-stars>
                     </div>
                 </div>
                 <div class="row">
