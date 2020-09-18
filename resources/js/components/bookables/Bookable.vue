@@ -18,8 +18,21 @@
                 <PriceBreakdown v-if="price" :price="price" />
             </transition>
             <transition name="fade">
-                <button v-if="price" class="btn btn-outline-secondary btn-block mt-2">Book now</button>
+                <button
+                v-if="price"
+                class="btn btn-outline-secondary btn-block mt-2"
+                @click="addToBasket"
+                :disabled="isAlreadyInBasket"
+                >Book now</button>
             </transition>
+            <transition name="fade">
+                <button
+                    v-if="isAlreadyInBasket"
+                    class="btn btn-outline-secondary btn-block mt-2"
+                    @click="removeFromBasket"
+                    >Remove from the basket</button>
+            </transition>
+            <div class="text-muted mt-2" v-if="isAlreadyInBasket">Seems like you`ve added this object in the basket. If you want to change dates, please before remove this object from the basket </div>
         </div>
 
     </div>
@@ -57,12 +70,26 @@ export default {
             } catch (error) {
                 this.price = null;
             }
+        },
+        addToBasket(){
+            this.$store.dispatch('addBasketItems', {
+                bookable: this.bookable,
+                price: this.price,
+                dates: this.lastSearch,
+            })
+        },
+        removeFromBasket(){
+            this.$store.dispatch('removeBasketItems', this.bookable.id);
         }
     },
     computed: {
         ...mapState({
-            lastSearch: 'lastSearch'
+            lastSearch: 'lastSearch',
         }),
+        isAlreadyInBasket(state){
+            if(null === this.bookable) return false;
+            return this.$store.getters.isAlreadyInBasket(this.bookable.id);
+        }
     }
 }
 </script>

@@ -1939,6 +1939,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -1946,8 +1950,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       lastSearch: this.$store.state.lastSearch
     };
   },
-  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])({
+  computed: _objectSpread(_objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])({
     computedLastSearch: 'lastSearch'
+  })), Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapGetters"])({
+    itemsInBasket: 'itemsInBasket'
   }))
 });
 
@@ -2344,6 +2350,19 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -2410,11 +2429,26 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           }
         }, _callee, null, [[3, 9]]);
       }))();
+    },
+    addToBasket: function addToBasket() {
+      this.$store.dispatch('addBasketItems', {
+        bookable: this.bookable,
+        price: this.price,
+        dates: this.lastSearch
+      });
+    },
+    removeFromBasket: function removeFromBasket() {
+      this.$store.dispatch('removeBasketItems', this.bookable.id);
     }
   },
-  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_4__["mapState"])({
+  computed: _objectSpread(_objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_4__["mapState"])({
     lastSearch: 'lastSearch'
-  }))
+  })), {}, {
+    isAlreadyInBasket: function isAlreadyInBasket(state) {
+      if (null === this.bookable) return false;
+      return this.$store.getters.isAlreadyInBasket(this.bookable.id);
+    }
+  })
 });
 
 /***/ }),
@@ -61005,6 +61039,19 @@ var render = function() {
               attrs: { to: { name: "home" } }
             },
             [_vm._v("LaravelBNB")]
+          ),
+          _vm._v(" "),
+          _c(
+            "router-link",
+            { staticClass: "btn navbutton", attrs: { to: { name: "home" } } },
+            [
+              _vm._v("\n                Basket\n                "),
+              _vm.itemsInBasket
+                ? _c("span", { staticClass: "badge badge-secondary" }, [
+                    _vm._v(_vm._s(_vm.itemsInBasket))
+                  ])
+                : _vm._e()
+            ]
           )
         ],
         1
@@ -61475,11 +61522,36 @@ var render = function() {
           _vm.price
             ? _c(
                 "button",
-                { staticClass: "btn btn-outline-secondary btn-block mt-2" },
+                {
+                  staticClass: "btn btn-outline-secondary btn-block mt-2",
+                  attrs: { disabled: _vm.isAlreadyInBasket },
+                  on: { click: _vm.addToBasket }
+                },
                 [_vm._v("Book now")]
               )
             : _vm._e()
-        ])
+        ]),
+        _vm._v(" "),
+        _c("transition", { attrs: { name: "fade" } }, [
+          _vm.isAlreadyInBasket
+            ? _c(
+                "button",
+                {
+                  staticClass: "btn btn-outline-secondary btn-block mt-2",
+                  on: { click: _vm.removeFromBasket }
+                },
+                [_vm._v("Remove from the basket")]
+              )
+            : _vm._e()
+        ]),
+        _vm._v(" "),
+        _vm.isAlreadyInBasket
+          ? _c("div", { staticClass: "text-muted mt-2" }, [
+              _vm._v(
+                "Seems like you`ve added this object in the basket. If you want to change dates, please before remove this object from the basket "
+              )
+            ])
+          : _vm._e()
       ],
       1
     )
@@ -79442,11 +79514,25 @@ __webpack_require__.r(__webpack_exports__);
     lastSearch: {
       from: null,
       to: null
+    },
+    basket: {
+      items: []
     }
   },
   mutations: {
     setLastSearch: function setLastSearch(state, payload) {
       state.lastSearch = payload;
+    },
+    addBasketItems: function addBasketItems(state, payload) {
+      state.basket.items.push(payload);
+    },
+    removeBasketItems: function removeBasketItems(state, payload) {
+      state.basket.items = state.basket.items.filter(function (item) {
+        return item.bookable.id !== payload;
+      });
+    },
+    setBasket: function setBasket(state, payload) {
+      state.basket = payload;
     }
   },
   actions: {
@@ -79454,12 +79540,42 @@ __webpack_require__.r(__webpack_exports__);
       context.commit('setLastSearch', payload);
       localStorage.setItem('lastSearch', JSON.stringify(payload));
     },
+    addBasketItems: function addBasketItems(_ref, payload) {
+      var commit = _ref.commit,
+          state = _ref.state;
+      commit('addBasketItems', payload);
+      localStorage.setItem('basket', JSON.stringify(state.basket));
+    },
+    removeBasketItems: function removeBasketItems(_ref2, payload) {
+      var commit = _ref2.commit,
+          state = _ref2.state;
+      context.commit('removeBasketItems', payload);
+      localStorage.setItem('basket', JSON.stringify(state.basket));
+    },
     loadStore: function loadStore(context) {
       var lastSearch = localStorage.getItem('lastSearch');
 
       if (lastSearch) {
         context.commit('setLastSearch', JSON.parse(lastSearch));
       }
+
+      var basket = localStorage.getItem('basket');
+
+      if (basket) {
+        context.commit('setBasket', JSON.parse(basket));
+      }
+    }
+  },
+  getters: {
+    itemsInBasket: function itemsInBasket(state) {
+      return state.basket.items.length;
+    },
+    isAlreadyInBasket: function isAlreadyInBasket(state) {
+      return function (id) {
+        return state.basket.items.reduce(function (result, item) {
+          return result || item.bookable.id === id;
+        }, false);
+      };
     }
   }
 });
