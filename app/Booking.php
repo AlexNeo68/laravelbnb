@@ -8,12 +8,19 @@ use Illuminate\Support\Str;
 
 class Booking extends Model
 {
+
+    protected $fillable = ['from', 'to', 'bookable_id', 'price', 'address_id'];
+
     public function bookable(){
         return $this->belongsTo(Bookable::class);
     }
 
     public function review(){
         return $this->hasOne(Review::class);
+    }
+
+    public function address(){
+        return $this->belongsTo(Address::class);
     }
 
     public function scopeBetweenDates(Builder $query, $from, $to){

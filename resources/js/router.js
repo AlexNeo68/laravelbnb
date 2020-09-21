@@ -2,6 +2,7 @@ import VueRouter from 'vue-router';
 import Bookables from './components/bookables/Bookables';
 import Bookable from './components/bookables/Bookable';
 import Review from './components/Review/Review';
+import Basket from './components/Basket/Basket';
 
 const routes = [
     {
@@ -18,6 +19,11 @@ const routes = [
         path: '/review/:id',
         component: Review,
         name: 'review',
+    },
+    {
+        path: '/basket',
+        component: Basket,
+        name: 'basket',
     }
 ];
 
